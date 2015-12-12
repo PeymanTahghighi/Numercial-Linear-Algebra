@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.40629.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Numerical Linear Algebra", "Numerical Linear Algebra\Numerical Linear Algebra.vcxproj", "{A352244F-BD26-48B9-BCB4-049E8216657F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A352244F-BD26-48B9-BCB4-049E8216657F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A352244F-BD26-48B9-BCB4-049E8216657F}.Debug|Win32.Build.0 = Debug|Win32
+		{A352244F-BD26-48B9-BCB4-049E8216657F}.Release|Win32.ActiveCfg = Release|Win32
+		{A352244F-BD26-48B9-BCB4-049E8216657F}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
