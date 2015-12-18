@@ -215,7 +215,7 @@ void GaussElimination::LUFactorization()
 
 	Matrix Multiply(this->m_matrix.RowSize(), this->m_matrix.ColumnSize());
 	Multiply = matricesMP[0];
-	for (int i = 1; i <matricesMP.size(); i++)
+	for (unsigned int i = 1; i <matricesMP.size(); i++)
 	{
 		std::cout << "\n\n***\n\n" << Multiply.MatrixDataToString() << "\n*\n" << matricesMP[i].MatrixDataToString() << "\n***";
 		Multiply = Multiply.Multiply(matricesMP[i]);
@@ -227,4 +227,22 @@ void GaussElimination::LUFactorization()
 
 	std::cout << "\n\n****CHECKING ****\n\n";
 	std::cout << Multiply.Multiply(this->m_matrix).MatrixDataToString();
+}
+
+void GaussElimination::CalculateLeastSquares()
+{
+	Matrix aTa(this->m_matrix.ColumnSize(), this->m_matrix.ColumnSize());
+	Matrix aTb(this->m_matrix.RowSize(), this->m_b.ColumnSize());
+	Matrix T;
+	T = this->m_matrix.Transpose();;
+	std::cout << "\n\n*** matrix is:\n" << this->m_matrix.MatrixDataToString();
+	std::cout << "\n\n*** matrix is:\n" << T.MatrixDataToString();
+	aTa = T.Multiply(this->m_matrix);
+	std::cout << "\n\n*** ATA is:\n" << aTa.MatrixDataToString();
+	aTb = T.Multiply(this->m_b);
+	std::cout << "\n\n*** ATB is:\n" << aTb.MatrixDataToString();
+	GaussElimination ge(aTa, aTb);
+	ge.DoScalling();
+	ge.SetCompletePivoting(true);
+	ge.Calculate();
 }

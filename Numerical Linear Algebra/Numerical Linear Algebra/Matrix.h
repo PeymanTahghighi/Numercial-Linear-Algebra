@@ -28,13 +28,14 @@ public:
 			
 		}
 
-		float operator [](int j)
+		float &operator [](const int j)
 		{
 			assert(j < this->m_size);
 			return this->m_data[j];
 		}
 
-		const float operator [](int j) const
+
+		const float &operator [](const int j) const
 		{
 			assert(j < this->m_size);
 			return this->m_data[j];
@@ -77,8 +78,19 @@ public:
 	bool IsSingular();
 	void FindMaxInBlock(int i, int *reti, int *retj);
 	void LoadIdentity();
-
-	
+	Matrix Transpose() const;
+	bool IsIdentity();
+	bool IsOrthogonal();
+	float MultiplyRowByColumnOfMatrixA(int row, const Matrix &A, int col);
+	void QRFactorization();
+	void LoadIdentityUpperTriangle();
+	void FillMatrix(float fillWith);
+	void Divide(float divideBy);
+	float SumOfRowAfterIndicePow2(int row,int col);
+	Matrix GetColumnInMatrix(int col);
+	void SetColumn(int col,const Matrix &mat);
+	void SetSubMatrix(const Matrix &mat, int fromRow, int fromCol);
+	void SetColumnOfMatrixFromRow(const Matrix &mat, int col,int row);
 
 public:
 	int ColumnSize() { return this->m_column; }
@@ -97,8 +109,23 @@ public:
 	Matrix & operator +(const Matrix & rhs);
 	Matrix & operator -(const Matrix & rhs);
 
+	void operator /(const float divideBy);
+	const void operator /(const float divideBy) const;
+
+	Matrix& operator *(const float i);
+	const Matrix& operator *(const float i) const;
+
+	Matrix operator *(const Matrix & rhs);
+
+	Matrix& operator *=(const float i);
+	const Matrix& operator *=(const float i) const;
+
+	Matrix& operator /=(const float divideBy);
+	const Matrix& operator /=(const float divideBy) const;
+
 	Row operator[](int i);
 	const Row operator [](int i) const;
+
 	
 private:
 	int m_column, m_rows;

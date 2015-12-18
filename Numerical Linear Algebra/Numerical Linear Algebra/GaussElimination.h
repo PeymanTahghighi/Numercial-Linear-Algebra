@@ -41,6 +41,7 @@ public:
 	std::vector<float> Calculate();
 	void CalulateUpper();
 	void LUFactorization();
+	void CalculateLeastSquares();
 
 private:
 	void DoScalling();

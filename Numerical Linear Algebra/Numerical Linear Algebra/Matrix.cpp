@@ -46,10 +46,13 @@ Matrix & Matrix::operator=(const Matrix & that)
 {
 	this->m_rows = that.RowSize();
 	this->m_column = that.ColumnSize();
-	this->m_data = new float*[this->m_rows];
-	for (int i = 0; i < this->m_rows; i++)
+	
 	{
-		this->m_data[i] = new float[this->m_column];
+		this->m_data = new float*[this->m_rows];
+		for (int i = 0; i < this->m_rows; i++)
+		{
+			this->m_data[i] = new float[this->m_column];
+		}
 	}
 	for (int i = 0; i < this->m_rows; i++)
 	{
@@ -455,4 +458,307 @@ void Matrix::LoadIdentity()
 			this->m_data[i][i] = 1;
 		}
 	}
+}
+
+
+
+Matrix Matrix::Transpose() const
+{
+	Matrix ret(this->m_column, this->m_rows);
+	for (int i = 0; i < this->m_rows; i++)
+	{
+		for (int j = 0; j < this->m_column; j++)
+		{
+			ret[j][i] = this->m_data[i][j];
+		}
+	}
+	return ret;
+}
+
+bool Matrix::IsIdentity()
+{
+	if (this->m_column != this->m_rows) return false;
+	for (int i = 0; i < this->m_rows; i++)
+	{
+		if (this->m_data[i][i] != 1) return false;
+	}
+	return true;
+}
+
+bool Matrix::IsOrthogonal()
+{
+	Matrix mt(*this);
+	Matrix m(*this);
+	mt.Transpose();
+	if (mt.Multiply(m).IsIdentity()) return true;
+	return false;
+}
+
+float Matrix::MultiplyRowByColumnOfMatrixA(int row, const Matrix &A, int col)
+{
+	assert(this->m_rows == A.ColumnSize());
+	float ret = 0;
+	for (int i = 0; i < this->m_rows; i++)
+	{
+		ret += this->m_data[row][i] * A[i][col];
+	}
+	return ret;
+}
+
+void Matrix::QRFactorization()
+{
+	int k = 0;
+	Matrix R(*this);
+	std::vector<Matrix> Qs;
+	while (k < this->m_column-1)
+	{
+		int sign = 0;
+		R[k][k] > 0 ? sign = 1 : sign = -1;
+		Matrix H(this->m_rows, this->m_rows);
+		H.LoadIdentity();
+		Matrix tmpH(this->m_rows - k, this->m_rows - k);
+		Matrix I(this->m_rows - k, this->m_rows - k);
+		Matrix vk(this->m_rows - k, 1);
+		Matrix ek(this->m_rows - k, 1);
+		Matrix vkT(1, this->m_rows - k);
+		Matrix xk(this->m_rows - k, 1);
+		H.LoadIdentity();
+		
+		xk.SetColumnOfMatrixFromRow(*this, k, k);
+		//std::cout << "*****\n\nxk:\n" << xk.MatrixDataToString();
+		float xknorm = sqrtf(xk.SumOfRowAfterIndicePow2(0, 0));
+		
+		ek[0][0] = 1.0f;
+		vk = xk - ek*(xknorm*sign);
+		//std::cout << "*****\n\vk:\n" << vk.MatrixDataToString();
+		
+		vkT = vk.Transpose();
+		//std::cout << "*****\n\vkt:\n" << vkT.MatrixDataToString();
+		Matrix vktV = vkT.Multiply(vk);
+		//std::cout << "*****\n\vktv:\n" << vktV.MatrixDataToString();
+		float c = 2 / vktV[0][0];
+		
+		I.LoadIdentity();
+		Matrix vvt(this->m_rows - k, this->m_rows - k);
+		//std::cout << "*****\n\vk:\n" << vk.MatrixDataToString();
+		//std::cout << "*****\n\vkt:\n" << vkT.MatrixDataToString();
+		vvt = vk.Multiply(vkT);
+		//std::cout << "*****\n\vvt:\n" << vvt.MatrixDataToString();
+		vvt *= c;
+		tmpH = I - vvt;
+		//std::cout << "*****\n\TMPH:\n" << tmpH.MatrixDataToString();
+		H.SetSubMatrix(tmpH, k, k);
+		Qs.push_back(H);
+		//std::cout << "*****\n\H:\n" << H.MatrixDataToString();
+		*this = H.Multiply(*this);
+		//std::cout << "*****\n\new Matrix\n" << this->MatrixDataToString();
+		k++;
+	}
+	Matrix tmp;
+	tmp = *this;
+	*this = R;
+	R=tmp;
+	std::cout << "\n\n******\nMATRIX R:\n\n" << R.MatrixDataToString();
+
+	Matrix Q(this->m_rows, this->m_rows);
+	if (Qs.size() == 1)
+	{
+		Q = Qs[0];
+	}
+
+	for (unsigned int i = 0; i < Qs.size() - 1; i++)
+	{
+
+		Q = Qs[i]*Qs[i + 1];
+	}
+	std::cout << "\n\n******\nMATRIX Q:\n\n" << Q.MatrixDataToString();
+
+	std::cout << "***/n/n Checking:" << std::endl << std::endl << std::endl << Q.Multiply(R).MatrixDataToString();
+
+}
+
+void Matrix::LoadIdentityUpperTriangle()
+{
+	int k = 1;
+	for (int i = 0; i < this->m_rows; i++)
+	{
+		for (int j = 0; j < k; j++)
+		{
+			this->m_data[j][i] = 1;
+		}
+		k++;
+	}
+}
+
+void Matrix::FillMatrix(float fillWith)
+{
+	for (int i = 0; i < this->m_rows; i++)
+	{
+		for (int j = 0; j < this->m_column; j++)
+		{
+			this->m_data[i][j] = fillWith;
+		}
+	}
+}
+
+void Matrix::Divide(float divideBy)
+{
+	for (int i = 0; i < this->m_rows; i++)
+	{
+		for (int j = 0; j < this->m_column; j++)
+		{
+			this->m_data[i][j] /= divideBy;
+		}
+	}
+}
+
+void Matrix::operator/(float divideBy)
+{
+	for (int i = 0; i < this->m_rows; i++)
+	{
+		for (int j = 0; j < this->m_column; j++)
+		{
+			this->m_data[i][j] /= divideBy;
+		}
+	}
+}
+const void Matrix::operator/(float divideBy) const
+{
+	for (int i = 0; i < this->m_rows; i++)
+	{
+		for (int j = 0; j < this->m_column; j++)
+		{
+			this->m_data[i][j] /= divideBy;
+		}
+	}
+}
+
+Matrix& Matrix::operator/=(float divideBy)
+{
+	for (int i = 0; i < this->m_rows; i++)
+	{
+		for (int j = 0; j < this->m_column; j++)
+		{
+			this->m_data[i][j] /= divideBy;
+		}
+	}
+	return *this;
+}
+const Matrix& Matrix::operator/=(float divideBy) const
+{
+	for (int i = 0; i < this->m_rows; i++)
+	{
+		for (int j = 0; j < this->m_column; j++)
+		{
+			this->m_data[i][j] /= divideBy;
+		}
+	}
+	return *this;
+}
+
+float Matrix::SumOfRowAfterIndicePow2(int row, int col)
+{
+	assert(row <= this->m_rows && col<=this->m_column);
+	float ret = 0;
+	for (int i = row; i < this->m_rows; i++)
+	{
+		ret += pow(this->m_data[i][col],2);
+	}
+	return ret;
+}
+
+Matrix Matrix::GetColumnInMatrix(int col)
+{
+	assert(col < this->m_column);
+	Matrix ret(this->m_rows, 1);
+	for (int i = 0; i < this->m_rows; i++)
+	{
+		ret[i][0] = this->m_data[i][col];
+	}
+	return ret;
+}
+
+void Matrix::SetColumn(int col,const Matrix & mat)
+{
+	assert(mat.ColumnSize() == 1 && col<this->m_column);
+
+	for (int i = 0; i < this->m_rows; i++)
+	{
+		this->m_data[i][col] = mat[i][0];
+	}
+}
+
+Matrix& Matrix::operator*(const float mul)
+{
+	for (int i = 0; i < this->m_rows; i++)
+	{
+		for (int j = 0; j < this->m_column; j++)
+		{
+			this->m_data[i][j] *= mul;
+		}
+	}
+	return *this;
+}
+
+const Matrix& Matrix::operator*(const float mul) const
+{
+	for (int i = 0; i < this->m_rows; i++)
+	{
+		for (int j = 0; j < this->m_column; j++)
+		{
+			this->m_data[i][j] *= mul;
+		}
+	}
+	return *this;
+}
+
+Matrix& Matrix::operator*=(const float mul)
+{
+	for (int i = 0; i < this->m_rows; i++)
+	{
+		for (int j = 0; j < this->m_column; j++)
+		{
+			this->m_data[i][j] *= mul;
+		}
+	}
+	return *this;
+}
+
+const Matrix& Matrix::operator*=(const float mul) const
+{
+	for (int i = 0; i < this->m_rows; i++)
+	{
+		for (int j = 0; j < this->m_column; j++)
+		{
+			this->m_data[i][j] *= mul;
+		}
+	}
+	return *this;
+}
+
+void Matrix::SetSubMatrix(const Matrix &mat, int fromRow, int fromCol)
+{
+	assert(this->m_column >= mat.ColumnSize() && this->m_rows >= mat.RowSize());
+	for (int i = fromRow,k=0; i < this->m_rows && k<mat.RowSize(); i++,k++)
+	{
+		for (int j = fromCol,l=0; j < this->m_column && l<mat.ColumnSize(); j++,l++)
+		{
+			this->m_data[i][j] = mat[k][l];
+		}
+	}
+}
+
+void Matrix::SetColumnOfMatrixFromRow(const Matrix &mat, int col, int row)
+{
+	for (int i = row, j = 0; i < mat.RowSize(); i++, j++)
+	{
+		float a = mat[i][col];;
+		this->m_data[j][0] = mat[i][col];
+	}
+}
+
+Matrix Matrix::operator*(const Matrix &rhs)
+{
+	Matrix ret = this->Multiply(rhs);
+	return ret;
 }

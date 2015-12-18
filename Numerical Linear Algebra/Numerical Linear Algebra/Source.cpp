@@ -3,34 +3,47 @@
 
 int main()
 {
-	
-	Matrix b(3,1);
-	b.UpdateData(0, 0, 8);
-	b.UpdateData(1, 0, -1);
-	b.UpdateData(2, 0, 13);
+	Matrix B(4, 1);
+	B[0][0] = 2;
+	B[1][0] = 4;
+	B[2][0] = 0;
+	B[3][0] = 1;
 
-	std::cout << "B:\n" << b.MatrixDataToString();
-	int a = -1;
-	std::cout << std::abs(a);
-	Matrix m(3, 3);
-	m.UpdateData(0, 0, 1);
-	m.UpdateData(0, 1, -1);
-	m.UpdateData(0, 2, 3);
-	m.UpdateData(1, 0, 2);
-	m.UpdateData(1, 1, 1);
-	m.UpdateData(1, 2, -1);
-	m.UpdateData(2, 0, 3);
-	m.UpdateData(2, 1,-6);
-	m.UpdateData(2, 2,2);
-	std::cout << "\n\nM:\n" << m.Inverse().MatrixDataToString();
+	Matrix A(3, 2);
+	A[0][0] = 1;
+	A[0][1] = 1;
+
+	A[1][0] =1;
+	A[1][1] = 2;
+
+	A[2][0] = 1;
+	A[2][1] = 3;
+
+	/*A[2][0] = 2;
+	A[2][1] = 0;
+	A[2][2] = 1;*/
+
+	/*A[3][0] = 0.9134;
+	A[3][1] = 0.9575;
+	A[3][2] = 0.4854;
+
+	A[4][0] = 0.6324;
+	A[4][1] = 0.9649;
+	A[4][2] = 0.8003;*/
+
+
+	std::cout << "\n\n\n" << A.MatrixDataToString();;
+	//std::cout << "\n\n\n" << A.GetColumnInMatrix(1).MatrixDataToString();;
+
+A.QRFactorization();;
 	//GaussElimination ge(m);
 	//ge.LUFactorization();
 
 	//std::cout<<m.Inverse().MatrixDataToString();
-	GaussElimination ge(m, b);
-	//ge.SetCompletePivoting(true);
-	//ge.SetScalling(true);
-	//ge.Calculate();
+	/*GaussElimination ge(q, b);
+	ge.SetCompletePivoting(true);
+	ge.SetScalling(true);
+	ge.Calculate();*/
 	
 	getchar();
 	return 0;
