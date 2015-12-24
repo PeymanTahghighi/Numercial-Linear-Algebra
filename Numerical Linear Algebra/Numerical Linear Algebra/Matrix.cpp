@@ -282,9 +282,10 @@ void Matrix::MultiplyRowByAndAddToRow(int row, float multiplyBy, int addRow)
 Matrix Matrix::Pow(int i)
 {
 	assert(this->m_column == this->m_rows);
+	if (i == 1) return *this;
 	Matrix m(this->m_rows,this->m_column);
 	m = *this;
-	for (int j = 0; j < i; j++)
+	for (int j = 1; j < i; j++)
 		m = m.Multiply(*this);
 	return m;
 }
@@ -380,6 +381,8 @@ float Matrix::Determinate()
 	float det = 1.0f;
 	Matrix detMat(*this);
 	GaussElimination ge(detMat);
+	ge.SetCompletePivoting(true);
+	ge.SetScalling(true);
 	ge.CalulateUpper();
 	Matrix u = ge.GetUpperMatrix();
 
@@ -480,7 +483,7 @@ bool Matrix::IsIdentity()
 	if (this->m_column != this->m_rows) return false;
 	for (int i = 0; i < this->m_rows; i++)
 	{
-		if (this->m_data[i][i] != 1) return false;
+		if (ceilf(this->m_data[i][i]) != 1.0f) return false;
 	}
 	return true;
 }
@@ -489,7 +492,10 @@ bool Matrix::IsOrthogonal()
 {
 	Matrix mt(*this);
 	Matrix m(*this);
-	mt.Transpose();
+	mt = m.Transpose();
+	std::cout << "\n\n" << mt.MatrixDataToString();
+	std::cout << "\n\n" << m.MatrixDataToString();
+	std::cout << "\n\n" << mt.Multiply(m).MatrixDataToString();
 	if (mt.Multiply(m).IsIdentity()) return true;
 	return false;
 }
@@ -574,6 +580,12 @@ void Matrix::QRFactorization()
 	std::cout << "\n\n******\nMATRIX Q:\n\n" << Q.MatrixDataToString();
 
 	std::cout << "***/n/n Checking:" << std::endl << std::endl << std::endl << Q.Multiply(R).MatrixDataToString();
+
+	std::cout << "\n\n****\nChecking Q is Orthogonal?\n";
+	if (Q.IsOrthogonal())
+	{
+		std::cout << "\n\nYES";
+	}
 
 }
 
@@ -761,4 +773,121 @@ Matrix Matrix::operator*(const Matrix &rhs)
 {
 	Matrix ret = this->Multiply(rhs);
 	return ret;
+}
+
+float Matrix::GetEigenvalues(float precision)
+{
+	Matrix u0(this->m_rows, 1);
+	for (int i = 0; i < this->m_rows; i++)
+	{
+		u0[i][0] = 1.0f;
+	}
+	Matrix u1(this->m_rows, 1);
+	Matrix u1t(1, this->m_rows);
+	Matrix utu(1, 1);
+	Matrix uta;
+	Matrix utau;
+	float diff = 100;
+	float k2 = 0.0f;
+	float k1 = 0.0f;
+	while (diff > precision)
+	{
+		
+		u1 = *this * u0;
+		std::cout << "\n\nU1\n" << u1.MatrixDataToString();
+
+		u1/=u1.GetInfiniteNorm();
+		std::cout << "\n\nU1\n" << u1.MatrixDataToString();
+		u1t = u1.Transpose();
+		std::cout << "\n\nU1t\n" << u1t.MatrixDataToString();
+		utu = u1t*u1;
+		uta = u1t* *this;
+		utau = uta*u1;
+		k1 = utau[0][0] / utu[0][0];
+		diff = std::abs((k1 - k2) / k1);
+		float temp = k1;
+		k1 = k2;
+		k2 = temp;
+		u0 = u1;
+		std::cout << "\n\nU0" << u0.MatrixDataToString();
+
+	}
+
+	return k1;
+
+	
+
+}
+
+void Matrix::GetCharacteristicPolynomial()
+{
+	float * allEigen = new float[this->m_rows];
+	allEigen[this->m_rows-1] = -this->Trace();
+	float* traces = new float[this->m_rows];
+	for (int i = 1; i <= this->m_rows; i++)
+	{
+		traces[i - 1] = this->Pow(i).Trace();
+	}
+
+	int n = this->m_rows-1;
+	for (int k = 1; k <= n; k++)
+	{
+		float sum = 0.0f;
+		for (int j = 0, l = k-1; j < k; j++, l--)
+		{
+			sum += allEigen[n - l] * traces[j];
+		}
+		sum += traces[k];
+		allEigen[n-k] = (-1)*((sum) / (k + 1));
+	}
+	std::string print = "";
+	print+= "\n\n*===\nCharacteristic Polynomial Is :\n\nK^"+std::to_string(this->m_rows);
+	for (int i = this->m_rows-1; i >=0; i--)
+	{ 
+		print += " (";
+		if (allEigen[i] > 0)
+			print+= " + ";
+
+		if (i != 1 && i!=0)
+		{
+			print += std::to_string(allEigen[i]);
+			print += " * K^" + std::to_string(i);
+		}
+		else if (i == 1)
+		{
+			print += std::to_string(allEigen[i]);
+			print += " * K";
+		}
+		else if (i == 0)
+		{
+			print += std::to_string(allEigen[i]);
+		}
+		print += "  )";
+	}
+	std::cout << print;
+}
+
+float Matrix::Trace()
+{
+	assert(this->m_rows == this->m_column);
+	float ret = 0.0f;
+	for (int i = 0; i < this->m_rows; i++)
+	{
+		ret += this->m_data[i][i];
+	}
+	return ret;
+}
+
+float Matrix::GetInfiniteNorm()
+{
+	float max = 0.0f;
+	for (int i = 0; i < this->m_column; i++)
+	{
+		for (int j = 0; j < this->m_rows; j++)
+		{
+			if (std::abs(this->m_data[j][i])>max) max = std::abs(this->m_data[j][i]);
+		}
+	}
+	return max;
+
 }

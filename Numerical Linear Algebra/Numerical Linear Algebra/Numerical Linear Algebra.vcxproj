@@ -65,10 +65,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="GaussElimination.h" />
+    <ClInclude Include="IterativeMethods.h" />
     <ClInclude Include="Matrix.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GaussElimination.cpp" />
+    <ClCompile Include="IterativeMethods.cpp" />
     <ClCompile Include="Matrix.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>

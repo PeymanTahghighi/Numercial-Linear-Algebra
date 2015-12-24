@@ -113,6 +113,7 @@ std::vector<float> GaussElimination::Calculate()
 		answers[swaps[i].swapBy] = temp;
 
 	}
+	
 	for (int i = 0; i < this->m_matrix.RowSize(); i++)
 	{
 		std::cout << "x" << std::to_string(i) << "=" << answers[i] << "\n";
@@ -144,16 +145,16 @@ void GaussElimination::DoScalling()
 
 void GaussElimination::CalulateUpper()
 {
-	//this->m_matrix.ScaleMatrix();
+	this->m_matrix.ScaleMatrix();
 	int k = 1;
 	int maxi = 0;
 	int maxj = 0;
 	for (int i = 0; i < this->m_matrix.RowSize(); i++)
 	{
 		
-		/*this->m_matrix.FindMaxInBlock(i, &maxi, &maxj);
+		this->m_matrix.FindMaxInBlock(i, &maxi, &maxj);
 		this->m_matrix.SwapRows(maxi, i);
-		this->m_matrix.SwapColumns(maxj, i);*/
+		this->m_matrix.SwapColumns(maxj, i);
 		//if we really change two rows.
 		//if (m != i)
 			this->m_signChange+=2;

@@ -91,6 +91,10 @@ public:
 	void SetColumn(int col,const Matrix &mat);
 	void SetSubMatrix(const Matrix &mat, int fromRow, int fromCol);
 	void SetColumnOfMatrixFromRow(const Matrix &mat, int col,int row);
+	float  GetEigenvalues(float precision);
+	void GetCharacteristicPolynomial();
+	float Trace();
+	float GetInfiniteNorm();
 
 public:
 	int ColumnSize() { return this->m_column; }
