@@ -22,8 +22,6 @@ std::vector<float> GaussElimination::Calculate()
 	assert(this->m_matrix.RowSize() == this->m_b.RowSize());
 	if (this->m_scalling)
 		DoScalling();
-	std::cout << "\n\nGuass Elemination Started ********************\n\n";
-
 	int k = 1;
 	int maxi = 0;
 	int maxj = 0;
@@ -38,14 +36,10 @@ std::vector<float> GaussElimination::Calculate()
 		}
 		else if (this->m_completePivoting)
 		{
-			std::cout << "\n\nM:\n" << this->m_matrix.MatrixDataToString();
-			std::cout << "\n\nB:\n" << this->m_b.MatrixDataToString();
 			this->m_matrix.FindMaxInBlock(i, &maxi, &maxj);
 			this->m_matrix.SwapRows(maxi, i);
 			this->m_b.SwapRows(maxi, i);
 			this->m_matrix.SwapColumns(maxj, i);
-			std::cout << "\n\nM:\n" << this->m_matrix.MatrixDataToString();
-			std::cout << "\n\nB:\n" << this->m_b.MatrixDataToString();
 			SwapRecord sr;
 			sr.swap = maxj;
 			sr.swapBy = i;
@@ -57,7 +51,6 @@ std::vector<float> GaussElimination::Calculate()
 		{
 			Operation o;
 			float m = 0.0f;
-			std::cout << this->m_matrix.MatrixDataToString();
 			m = -(this->m_matrix[j][i]) / (this->m_matrix[i][i]);
 			this->m_matrix.MultiplyRowByAndAddToRow(i, m, j);
 			this->m_b.MultiplyRowByAndAddToRow(i, m, j);
@@ -69,16 +62,6 @@ std::vector<float> GaussElimination::Calculate()
 		}
 		k++;
 	}
-
-	std::cout << "\n\n*****Upper Matrix Of M*****\n\n";
-	std::cout << this->m_matrix.MatrixDataToString();
-	std::cout << "\n\n***************************\n\n";
-
-	std::cout << "\n\n*****Upper Matrix Of B*****\n\n";
-	std::cout << this->m_b.MatrixDataToString();
-	std::cout << "\n\n***************************\n\n";
-
-
 	float *answers = new float[this->m_matrix.RowSize()];
 	k = this->m_matrix.RowSize() - 1;
 	for (int i = this->m_matrix.RowSize() - 1; i >= 0; i--)
@@ -98,14 +81,8 @@ std::vector<float> GaussElimination::Calculate()
 		k--;
 	}
 
-	for (int i = 0; i < this->m_matrix.RowSize(); i++)
-	{
-		std::cout << "x" << std::to_string(i) << "=" << answers[i] << "\n";
-		//ret.push_back(answers[i]);
-	}
-
 	std::vector<float> ret;
-	std::cout << "\n\n**************Answers Are*************\n\n";
+	
 	for (int i = swaps.size() - 1; i >= 0;i--)
 	{
 		float temp = answers[swaps[i].swap];
@@ -116,12 +93,9 @@ std::vector<float> GaussElimination::Calculate()
 	
 	for (int i = 0; i < this->m_matrix.RowSize(); i++)
 	{
-		std::cout << "x" << std::to_string(i) << "=" << answers[i] << "\n";
 		ret.push_back(answers[i]);
 	}
 
-	std::cout << "\n\n************************************\n\n";
-	std::cout << "\nFinished Gauss Elemination*******************\n\n";
 	return ret;
 }
 
@@ -169,10 +143,6 @@ void GaussElimination::CalulateUpper()
 		}
 		k++;
 	}
-
-	std::cout << "\n\n****Upper Triangular Matrix M ****\n\n";
-	std::cout << this->m_matrix.MatrixDataToString();
-	std::cout << "\n\n**********************************\n\n";
 }
 
 void GaussElimination::LUFactorization()
@@ -236,14 +206,19 @@ void GaussElimination::CalculateLeastSquares()
 	Matrix aTb(this->m_matrix.RowSize(), this->m_b.ColumnSize());
 	Matrix T;
 	T = this->m_matrix.Transpose();;
-	std::cout << "\n\n*** matrix is:\n" << this->m_matrix.MatrixDataToString();
-	std::cout << "\n\n*** matrix is:\n" << T.MatrixDataToString();
+	//std::cout << "\n\n*** matrix is:\n" << this->m_matrix.MatrixDataToString();
+	//std::cout << "\n\n*** matrix is:\n" << T.MatrixDataToString();
 	aTa = T.Multiply(this->m_matrix);
-	std::cout << "\n\n*** ATA is:\n" << aTa.MatrixDataToString();
+	//std::cout << "\n\n*** ATA is:\n" << aTa.MatrixDataToString();
 	aTb = T.Multiply(this->m_b);
-	std::cout << "\n\n*** ATB is:\n" << aTb.MatrixDataToString();
+	//std::cout << "\n\n*** ATB is:\n" << aTb.MatrixDataToString();
 	GaussElimination ge(aTa, aTb);
 	ge.DoScalling();
 	ge.SetCompletePivoting(true);
-	ge.Calculate();
+	std::vector<float> ans= ge.Calculate();
+	std::cout << "\nLeast Square Answers Are:\n";
+	for (int i = 0; i < ans.size(); i++)
+	{
+		std::cout << "x" << std::to_string(i) << "=" << ans[i] << "\n";
+	}
 }

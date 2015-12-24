@@ -339,9 +339,8 @@ int Matrix::FindMaxIndiceInColumn(int col,int from)
 
 Matrix Matrix::Inverse()
 {
-	std::cout << "\n\nM:\n" << this->MatrixDataToString();
+	
 	assert(!IsSingular());
-	std::cout << "\n\nM:\n" << this->MatrixDataToString();
 	Matrix ret(this->m_rows, this->m_column);
 	std::vector<float> answers;
 	for (int i = 0; i < this->m_rows; i++)
@@ -357,13 +356,13 @@ Matrix Matrix::Inverse()
 		{
 			ret.UpdateData(j, i, answers[j]);
 		}
-		std::cout << "\n\n" << ret.MatrixDataToString() << "\n\n";
 	}
 
 	std::cout << "\n\n** Checking is inversed?*****\n\n";
 	Matrix I = ret.Multiply(*this);
 	std::cout << I.MatrixDataToString();
-	std::cout << "\n\n** Finished *****\n\n";
+	std::cout << "\n\n**====================**\n\n";
+	std::cout << "M Inversed Is:\n\n";
 	return ret;
 }
 
@@ -564,7 +563,7 @@ void Matrix::QRFactorization()
 	tmp = *this;
 	*this = R;
 	R=tmp;
-	std::cout << "\n\n******\nMATRIX R:\n\n" << R.MatrixDataToString();
+	
 
 	Matrix Q(this->m_rows, this->m_rows);
 	if (Qs.size() == 1)
@@ -577,16 +576,17 @@ void Matrix::QRFactorization()
 
 		Q = Qs[i]*Qs[i + 1];
 	}
-	std::cout << "\n\n******\nMATRIX Q:\n\n" << Q.MatrixDataToString();
 
-	std::cout << "***/n/n Checking:" << std::endl << std::endl << std::endl << Q.Multiply(R).MatrixDataToString();
+	std::cout << std::endl<<std::endl<<"Checking QxR :" << std::endl << std::endl << std::endl << Q.Multiply(R).MatrixDataToString();
 
-	std::cout << "\n\n****\nChecking Q is Orthogonal?\n";
-	if (Q.IsOrthogonal())
-	{
-		std::cout << "\n\nYES";
-	}
+	std::cout << "\n\n\nChecking Q is Orthogonal? Qt * Q Is \n";
+	
+	Matrix Qtemp(Q);
+	Matrix QtTemp = Q.Transpose();
+	std::cout << QtTemp.Multiply(Qtemp).MatrixDataToString();
 
+	std::cout << "\n\nMATRIX R:\n\n" << R.MatrixDataToString();
+	std::cout << "\n\nMATRIX Q:\n\n" << Q.MatrixDataToString();
 }
 
 void Matrix::LoadIdentityUpperTriangle()
@@ -812,11 +812,7 @@ float Matrix::GetEigenvalues(float precision)
 		std::cout << "\n\nU0" << u0.MatrixDataToString();
 
 	}
-
 	return k1;
-
-	
-
 }
 
 void Matrix::GetCharacteristicPolynomial()
@@ -841,7 +837,7 @@ void Matrix::GetCharacteristicPolynomial()
 		allEigen[n-k] = (-1)*((sum) / (k + 1));
 	}
 	std::string print = "";
-	print+= "\n\n*===\nCharacteristic Polynomial Is :\n\nK^"+std::to_string(this->m_rows);
+	print+= "\nCharacteristic Polynomial Is :\n\nK^"+std::to_string(this->m_rows);
 	for (int i = this->m_rows-1; i >=0; i--)
 	{ 
 		print += " (";
