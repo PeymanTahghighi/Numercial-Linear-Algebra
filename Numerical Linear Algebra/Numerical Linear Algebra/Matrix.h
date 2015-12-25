@@ -82,7 +82,7 @@ public:
 	bool IsIdentity();
 	bool IsOrthogonal();
 	float MultiplyRowByColumnOfMatrixA(int row, const Matrix &A, int col);
-	void QRFactorization();
+	void QRFactorization(Matrix *Q,Matrix *R);
 	void LoadIdentityUpperTriangle();
 	void FillMatrix(float fillWith);
 	void Divide(float divideBy);
@@ -91,13 +91,14 @@ public:
 	void SetColumn(int col,const Matrix &mat);
 	void SetSubMatrix(const Matrix &mat, int fromRow, int fromCol);
 	void SetColumnOfMatrixFromRow(const Matrix &mat, int col,int row);
-	float  GetMaxEigenvaluesUsingPowerMethod(float precision);
+	float GetMaxEigenvaluesUsingPowerMethod(float precision,Matrix & eigenVector);
 	std::vector<float> GetCharacteristicPolynomial();
 	float Trace();
 	float GetInfiniteNorm();
 	void SetDiagonalElements(std::vector<float> vec);
 	void SetUnderRowElements(float val);
 	void SetRow(int r,std::vector<float> vec);
+	bool isDiagonal();
 
 public:
 	int ColumnSize() { return this->m_column; }
@@ -108,6 +109,8 @@ public:
 	float GetDataAt(int i, int j)  { return this->m_data[i][j]; }
 	const float * GetRow(int i) const { return this->m_data[i]; }
 	float * GetRow(int i) { return this->m_data[i]; }
+
+	
 
 public:
 	bool operator ==(const Matrix & that);

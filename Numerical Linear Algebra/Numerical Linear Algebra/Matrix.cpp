@@ -1,5 +1,6 @@
 #include "Matrix.h"
 #include"GaussElimination.h"
+#include"IterativeMethods.h"
 #include<iostream>
 
 #define MAX_SPACE 10
@@ -510,7 +511,7 @@ float Matrix::MultiplyRowByColumnOfMatrixA(int row, const Matrix &A, int col)
 	return ret;
 }
 
-void Matrix::QRFactorization()
+void Matrix::QRFactorization(Matrix *Qr, Matrix *Rr)
 {
 	int k = 0;
 	Matrix R(*this);
@@ -775,7 +776,7 @@ Matrix Matrix::operator*(const Matrix &rhs)
 	return ret;
 }
 
-float Matrix::GetMaxEigenvaluesUsingPowerMethod(float precision)
+float Matrix::GetMaxEigenvaluesUsingPowerMethod(float precision,Matrix &eigenVector)
 {
 	Matrix u0(this->m_rows, 1);
 	for (int i = 0; i < this->m_rows; i++)
@@ -815,6 +816,33 @@ float Matrix::GetMaxEigenvaluesUsingPowerMethod(float precision)
 		std::cout << "\n=====*\n";
 
 	}
+
+	/*Matrix M(*this);
+	Matrix b(this->m_rows, 1);
+	M *= -1;
+	for (int i = 0; i < this->m_rows; i++)
+	{
+		M[i][i] = k1 + M[i][i];
+		b[i][0] = 1.0f;
+	}
+
+	std::cout << M.MatrixDataToString();
+	
+	Matrix cpy(*this);
+	Matrix Q;
+	Matrix R;
+	cpy.QRFactorization(&Q, &R);
+	Matrix EigenVector = Q;
+	cpy = R*Q;
+	for (int i = 0; i < 10; i++)
+	{
+		cpy.QRFactorization(&Q, &R);
+		cpy = R*Q;
+		EigenVector=EigenVector.Multiply(Q);
+		std::cout << "\n\nMatrix M at this Point\n" << cpy.MatrixDataToString();
+		std::cout << "\n\nEigenVector At this Point:\n" << EigenVector.MatrixDataToString();
+		if (cpy.isDiagonal()) break;
+	}*/
 
 	return k1;
 }
@@ -922,4 +950,20 @@ void Matrix::SetRow(int r, std::vector<float> vec)
 	{
 		this->m_data[r][i] = vec[i];
 	}
+}
+
+bool Matrix::isDiagonal()
+{
+	for (int i = 0; i < this->m_rows; i++)
+	{
+		for (int j = 0; j < this->m_column; j++)
+		{
+			if (i == j) continue;
+			if(this->m_data[i][j] != 0.0f)
+			{
+				return false;
+			}
+		}
+	}
+	return true;
 }

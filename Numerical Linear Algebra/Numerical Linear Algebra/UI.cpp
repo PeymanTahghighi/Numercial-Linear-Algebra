@@ -106,6 +106,7 @@ void UI::ProcessInput(int i)
 			ge.SetPartialPivoting(b);
 		}
 		ClearScreen();
+		
 		std::vector<float> ans = ge.Calculate();
 		for (int i = 0; i < ans.size(); i++)
 		{
@@ -161,7 +162,7 @@ void UI::ProcessInput(int i)
 	{
 		ClearScreen(); 
 		std::cout << "---------------------------------------\n";
-		this->m_matrix.QRFactorization();
+		this->m_matrix.QRFactorization(nullptr,nullptr);
 		getchar();
 		getchar();
 		RenderMainMenu();
@@ -187,6 +188,7 @@ void UI::ProcessInput(int i)
 		std::cout << "---------------------------------------\n";
 		IterativeMethods it(this->m_matrix, this->m_b);
 		it.SetIteration(i);
+		it.SetLog(true);
 		it.CalculateUsingJacobiAlgorithm();
 		getchar();
 		getchar();
@@ -203,6 +205,7 @@ void UI::ProcessInput(int i)
 		std::cout << "---------------------------------------\n";
 		IterativeMethods it(this->m_matrix, this->m_b);
 		it.SetIteration(i);
+		it.SetLog(true);
 		it.CalculateUsingGaussSidelAlgorithm();
 		getchar();
 		getchar();
@@ -216,7 +219,7 @@ void UI::ProcessInput(int i)
 		std::cout << "------------------------------------------";
 		if (this->m_matrix.RowSize() == this->m_matrix.ColumnSize())
 		{
-			std::cout << "ERROR:Cannot Find Least Squares Answers!";
+			std::cout << "ERROR : Cannot Find Least Squares Answers!";
 			getchar();
 			getchar();
 			RenderMainMenu();
@@ -274,7 +277,8 @@ void UI::ProcessInput(int i)
 		std::cout << "\n\nEnter Precision:";
 		float p;
 		std::cin >> p;
-		float max = m1.GetMaxEigenvaluesUsingPowerMethod(p);
+		Matrix e(i, 1);
+		float max = m1.GetMaxEigenvaluesUsingPowerMethod(p,e);
 		std::cout << "**=========================**";
 		std::cout << "\n\nMax Eigen Value Is :  " << max;
 		getchar();

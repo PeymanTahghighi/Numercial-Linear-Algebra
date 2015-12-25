@@ -14,7 +14,7 @@ IterativeMethods::~IterativeMethods()
 {
 }
 
-void IterativeMethods::CalculateUsingJacobiAlgorithm()
+std::vector<float> IterativeMethods::CalculateUsingJacobiAlgorithm()
 {
 	float * answers = new float[this->m_b.RowSize()];
 	std::vector<float*> iterativeLevels;
@@ -42,23 +42,30 @@ void IterativeMethods::CalculateUsingJacobiAlgorithm()
 
 	
 		iterativeLevels.at(i+1) = nanswers;
-		std::cout << "\n\n*======= Answers At Level " << i << " Is:";
-		for (int j = 0; j < this->m_b.RowSize(); j++)
+		if (this->m_log)
 		{
-			std::cout << "\n Answer " << j << " : " << nanswers[j];
+			std::cout << "\n\n*======= Answers At Level " << i << " Is:";
+			for (int j = 0; j < this->m_b.RowSize(); j++)
+			{
+				std::cout << "\n Answer " << j << " : " << nanswers[j];
+			}
+			std::cout << "\n=======*";
 		}
-		std::cout << "\n=======*";
-		
 	}
-	std::cout << "\n\n*================Final Answers:\n";
+	if (this->m_log)
+		std::cout << "\n\n*================Final Answers:\n";
+	std::vector<float> ret;
 	for (int i = 0; i < this->m_matrix.RowSize(); i++)
 	{
-		std::cout << "x" << std::to_string(i) << "=" << iterativeLevels[iterativeLevels.size()-1][i] << "\n";
-	}
+		if (this->m_log)
+			std::cout << "x" << std::to_string(i) << "=" << iterativeLevels[iterativeLevels.size()-1][i] << "\n";
 
+		ret.push_back(iterativeLevels[iterativeLevels.size() - 1][i]);
+	}
+	return ret;
 }
 
-void IterativeMethods::CalculateUsingGaussSidelAlgorithm()
+std::vector<float> IterativeMethods::CalculateUsingGaussSidelAlgorithm()
 {
 	float * answers = new float[this->m_b.RowSize()];
 	std::vector<float*> iterativeLevels;
@@ -127,17 +134,24 @@ void IterativeMethods::CalculateUsingGaussSidelAlgorithm()
 
 
 		iterativeLevels.at(i) = nanswers;
-		std::cout << "\n\n*======= Answers At Level " << i << " Is:";
-		for (int j = 0; j < this->m_b.RowSize(); j++)
+		if (this->m_log)
 		{
-			std::cout << "\n Answer " << j << " : " << nanswers[j];
+			std::cout << "\n\n*======= Answers At Level " << i << " Is:";
+			for (int j = 0; j < this->m_b.RowSize(); j++)
+			{
+				std::cout << "\n Answer " << j << " : " << nanswers[j];
+			}
+			std::cout << "\n=======*";
 		}
-		std::cout << "\n=======*";
-
 	}
-	std::cout << "\n\n*================Final Answers:\n";
+	std::vector<float> ret;
+	if (this->m_log)
+		std::cout << "\n\n*================Final Answers:\n";
 	for (int i = 0; i < this->m_matrix.RowSize(); i++)
 	{
-		std::cout << "x" << std::to_string(i) << "=" << iterativeLevels[iterativeLevels.size() - 1][i] << "\n";
+		if (this->m_log)
+			std::cout << "x" << std::to_string(i) << "=" << iterativeLevels[iterativeLevels.size() - 1][i] << "\n";
+		ret.push_back(iterativeLevels[iterativeLevels.size() - 1][i]);
 	}
+	return ret;
 }

@@ -17,13 +17,19 @@ public:
 	void SetTelorance(float t)			{ this->m_telorance = t; }
 	float GetTelorance()				{ return this->m_telorance; }
 
+	void SetLog(bool b)					{ this->m_log = b; }
+	bool GetLog()						{ return this->m_log; }
+
 public:
-	void CalculateUsingJacobiAlgorithm();
-	void CalculateUsingGaussSidelAlgorithm();
+	std::vector<float> CalculateUsingJacobiAlgorithm();
+	std::vector<float> CalculateUsingGaussSidelAlgorithm();
+
+
 
 private:
 	Matrix m_matrix, m_b;
 	int m_iteration;
 	float m_telorance;
+	bool m_log;
 };
 

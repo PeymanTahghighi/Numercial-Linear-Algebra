@@ -8,6 +8,6 @@ int main()
 	UI * ui = new UI();
 	ui->Initialize();
 	getchar();
-	delete ui;
+	//delete ui;
 	return 0;
 }
