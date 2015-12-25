@@ -775,7 +775,7 @@ Matrix Matrix::operator*(const Matrix &rhs)
 	return ret;
 }
 
-float Matrix::GetEigenvalues(float precision)
+float Matrix::GetMaxEigenvaluesUsingPowerMethod(float precision)
 {
 	Matrix u0(this->m_rows, 1);
 	for (int i = 0; i < this->m_rows; i++)
@@ -794,12 +794,12 @@ float Matrix::GetEigenvalues(float precision)
 	{
 		
 		u1 = *this * u0;
-		std::cout << "\n\nU1\n" << u1.MatrixDataToString();
+		
 
 		u1/=u1.GetInfiniteNorm();
-		std::cout << "\n\nU1\n" << u1.MatrixDataToString();
+	
 		u1t = u1.Transpose();
-		std::cout << "\n\nU1t\n" << u1t.MatrixDataToString();
+		
 		utu = u1t*u1;
 		uta = u1t* *this;
 		utau = uta*u1;
@@ -809,13 +809,17 @@ float Matrix::GetEigenvalues(float precision)
 		k1 = k2;
 		k2 = temp;
 		u0 = u1;
-		std::cout << "\n\nU0" << u0.MatrixDataToString();
+		std::cout << "\n\n*=====";
+		std::cout << "\nMax Eigen At This Stage Is : " << k1;
+		std::cout << "\nDifference Is:  " << diff;
+		std::cout << "\n=====*\n";
 
 	}
+
 	return k1;
 }
 
-void Matrix::GetCharacteristicPolynomial()
+std::vector<float> Matrix::GetCharacteristicPolynomial()
 {
 	float * allEigen = new float[this->m_rows];
 	allEigen[this->m_rows-1] = -this->Trace();
@@ -861,6 +865,13 @@ void Matrix::GetCharacteristicPolynomial()
 		print += "  )";
 	}
 	std::cout << print;
+
+	std::vector<float> ret;
+	for (int i = 0; i < this->m_rows; i++)
+	{
+		ret.push_back(allEigen[i]);
+	}
+	return ret;
 }
 
 float Matrix::Trace()
@@ -886,4 +897,29 @@ float Matrix::GetInfiniteNorm()
 	}
 	return max;
 
+}
+
+void Matrix::SetDiagonalElements(std::vector<float> vec)
+{
+	assert(this->m_rows == vec.size());
+	for (int i = 0; i < this->m_rows; i++)
+	{
+		this->m_data[i][i] = vec[i];
+	}
+}
+
+void Matrix::SetUnderRowElements(float val)
+{
+	for (int i = 1; i < this->m_rows; i++)
+	{
+		this->m_data[i][i - 1] = val;
+	}
+}
+
+void Matrix::SetRow(int r, std::vector<float> vec)
+{
+	for (int i = 0; i < this->m_column; i++)
+	{
+		this->m_data[r][i] = vec[i];
+	}
 }
