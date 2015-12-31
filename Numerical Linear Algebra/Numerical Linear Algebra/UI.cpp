@@ -75,7 +75,7 @@ void UI::RenderMainMenu()
 	std::cout << "\n7-Calculate System Using Jacobi Method.";
 	std::cout << "\n8-Calculate System Using Gauss-Sidel Method.";
 	std::cout << "\n9-Calculate Least Square Answers.";
-	std::cout << "\n10-Enter Eigenvalues To Create Matrix.";
+	std::cout << "\n10-Enter Eigenvalues To Create Matrix.(PROJECT)";
 	std::cout << "\n0-To Exit.";
 	int i;
 	std::cout << "\n\nChoice:";
@@ -123,12 +123,13 @@ void UI::ProcessInput(int i)
 		if (this->m_matrix.IsSingular())
 		{
 
-			std::cout << "ERROR:Matrix Is Singular!";
+			std::cout << "ERROR : Matrix Is Singular!";
 			getchar();
 			getchar();
 			RenderMainMenu();
 			break;
 		}
+		std::cout << "\n\n==*Matrix Inverse\n";
 		std::cout << this->m_matrix.Inverse().MatrixDataToString();
 		getchar();
 		getchar();
@@ -270,7 +271,7 @@ void UI::ProcessInput(int i)
 		std::cout << m1.MatrixDataToString();
 		std::cout << "\n\nChecking Characteristic Polynomial Of New Matrix:\n";
 		m1.GetCharacteristicPolynomial();
-		std::cout << "Now We Use Power Method To Find Max EigenValue\n\nPress Enter To Continue...";
+		std::cout << "Now We Use Deflation To Calculate All EigenValues\n\nPress Enter To Continue...";
 		getchar();
 		ClearScreen();
 		std::cout << "---------------------------------------";
@@ -278,9 +279,24 @@ void UI::ProcessInput(int i)
 		float p;
 		std::cin >> p;
 		Matrix e(i, 1);
-		float max = m1.GetMaxEigenvaluesUsingPowerMethod(p,e);
+		std::vector<float> ans =  m1.GetEigenValuesUsingDeflation(p);
+		ClearScreen();
 		std::cout << "**=========================**";
-		std::cout << "\n\nMax Eigen Value Is :  " << max;
+		for (auto const & member : ans)
+		{
+			std::cout << "\n\n==*\n EigenValue : " << member;
+			std::cout << "\n*==";
+		}
+		getchar();
+		getchar();
+		RenderMainMenu();
+	}
+	break;
+	case 1100:
+	{
+		ClearScreen();
+		GaussElimination ge(this->m_matrix);
+		ge.LUFactorization();
 		getchar();
 		getchar();
 		RenderMainMenu();

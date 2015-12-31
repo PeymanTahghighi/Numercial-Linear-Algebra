@@ -147,9 +147,9 @@ void GaussElimination::CalulateUpper()
 
 void GaussElimination::LUFactorization()
 {
-	std::vector<Matrix> matricesMP;
-	std::vector<Matrix> matricesQ;
-	//this->m_matrix.ScaleMatrix();
+	std::vector<Matrix> matricesL;
+	std::vector<Matrix> matricesP;
+	
 	int k = 1;
 	int maxi = 0;
 	int maxj = 0;
@@ -160,7 +160,7 @@ void GaussElimination::LUFactorization()
 		int m = this->m_matrix.FindMaxIndiceInColumn(i, i);
 		this->m_matrix.SwapRows(m, i);
 		P.SwapRows(m, i);
-		matricesMP.push_back(P);
+		matricesP.push_back(P);
 
 		Matrix M(this->m_matrix.RowSize(), this->m_matrix.ColumnSize());
 		M.LoadIdentity();
@@ -170,34 +170,48 @@ void GaussElimination::LUFactorization()
 			
 			m = -(this->m_matrix[j][i]) / (this->m_matrix[i][i]);
 			this->m_matrix.MultiplyRowByAndAddToRow(i, m, j);
-			M.MultiplyRowByAndAddToRow(i, (m), j);
+			M.MultiplyRowByAndAddToRow(i, (m)*-1, j);
 		}
 
-		matricesMP.push_back(M);
+		matricesL.push_back(M);
 		std::cout << "\n\n Permutation\n" << P.MatrixDataToString();
 		std::cout << "\n\nM" << M.MatrixDataToString() << "\n\n";
 		std::cout << "\n\nMatrix" << this->m_matrix.MatrixDataToString() << "\n\n";
 		k++;
 	}
 
-	std::cout << "\n\n****Upper Triangular Matrix M ****\n\n";
+	std::cout << "\n\n*===Matrix U\n";
 	std::cout << this->m_matrix.MatrixDataToString();
-	std::cout << "\n\n**********************************\n\n";
+	std::cout << "\n===*\n\n";
 
 	Matrix Multiply(this->m_matrix.RowSize(), this->m_matrix.ColumnSize());
-	Multiply = matricesMP[0];
-	for (unsigned int i = 1; i <matricesMP.size(); i++)
+	Multiply = matricesL[0];
+	for (unsigned int i = 1; i <matricesL.size(); i++)
 	{
-		std::cout << "\n\n***\n\n" << Multiply.MatrixDataToString() << "\n*\n" << matricesMP[i].MatrixDataToString() << "\n***";
-		Multiply = Multiply.Multiply(matricesMP[i]);
-		std::cout << "\n\nR?ESult\n\n" << Multiply.MatrixDataToString();
+		Multiply = Multiply.Multiply(matricesL[i]);
 	}
 
-	std::cout << "\n\n****MATRIX L ****\n\n";
-	std::cout <<Multiply.MatrixDataToString();
+	Matrix permu(this->m_matrix.RowSize(), this->m_matrix.ColumnSize());
+	permu = matricesP[0];
+	for (unsigned int i = 1; i <matricesP.size(); i++)
+	{
+		permu = permu.Multiply(matricesP[i]);
+	}
 
-	std::cout << "\n\n****CHECKING ****\n\n";
-	std::cout << Multiply.Multiply(this->m_matrix).MatrixDataToString();
+	std::cout << "\n\n*===MATRIX L\n\n";
+	std::cout <<Multiply.MatrixDataToString();
+	std::cout << "\n\n===*\n\n";
+
+	std::cout << "\n\n*===MATRIX P\n\n";
+	std::cout << permu.MatrixDataToString();
+	std::cout << "\n\n===*\n\n";
+
+	std::cout << "\n\n==*Cheking Answer:\n\n";
+	Matrix ans = Multiply.Multiply(this->m_matrix);
+	ans = permu*ans;
+	std::cout << ans.MatrixDataToString();
+	std::cout << "\n\n===*\n\n";
+
 }
 
 void GaussElimination::CalculateLeastSquares()

@@ -42,6 +42,7 @@ public:
 	void CalulateUpper();
 	void LUFactorization();
 	void CalculateLeastSquares();
+	void SetLog(bool b)			{ this->m_log = b; }
 
 private:
 	void DoScalling();
@@ -52,5 +53,6 @@ private:
 	int m_signChange;
 
 	bool m_scalling, m_partialPivoting, m_completePivoting;
+	bool m_log;
 };
 

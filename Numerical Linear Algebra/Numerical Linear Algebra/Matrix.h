@@ -90,6 +90,7 @@ public:
 	Matrix GetColumnInMatrix(int col);
 	void SetColumn(int col,const Matrix &mat);
 	void SetSubMatrix(const Matrix &mat, int fromRow, int fromCol);
+	Matrix GetSubMatrix(int row, int col);
 	void SetColumnOfMatrixFromRow(const Matrix &mat, int col,int row);
 	float GetMaxEigenvaluesUsingPowerMethod(float precision,Matrix & eigenVector);
 	std::vector<float> GetCharacteristicPolynomial();
@@ -99,6 +100,10 @@ public:
 	void SetUnderRowElements(float val);
 	void SetRow(int r,std::vector<float> vec);
 	bool isDiagonal();
+	Matrix GetAdjoint();
+	std::vector<float> GetEigenValuesUsingDeflation(float precision);
+	void ResizeMatrix(int newRow, int newCol);
+	int FindDataIndiceInColumn(int col,float data);
 
 public:
 	int ColumnSize() { return this->m_column; }

@@ -3,7 +3,7 @@
 #include"IterativeMethods.h"
 #include<iostream>
 
-#define MAX_SPACE 10
+#define MAX_SPACE 4
 
 Matrix::Matrix(int r, int c)
 {
@@ -351,6 +351,7 @@ Matrix Matrix::Inverse()
 		GaussElimination ge(*this, b);
 		ge.SetScalling(true);
 		ge.SetCompletePivoting(true);
+		
 		answers = ge.Calculate();
 		
 		for (int j = this->m_column-1; j >=0; j--)
@@ -359,11 +360,11 @@ Matrix Matrix::Inverse()
 		}
 	}
 
-	std::cout << "\n\n** Checking is inversed?*****\n\n";
+	//std::cout << "\n\n** Checking is inversed?*****\n\n";
 	Matrix I = ret.Multiply(*this);
-	std::cout << I.MatrixDataToString();
-	std::cout << "\n\n**====================**\n\n";
-	std::cout << "M Inversed Is:\n\n";
+	///std::cout << I.MatrixDataToString();
+	//std::cout << "\n\n**====================**\n\n";
+	//std::cout << "M Inversed Is:\n\n";
 	return ret;
 }
 
@@ -516,10 +517,10 @@ void Matrix::QRFactorization(Matrix *Qr, Matrix *Rr)
 	int k = 0;
 	Matrix R(*this);
 	std::vector<Matrix> Qs;
-	while (k < this->m_column-1)
+	while (k < this->m_column)
 	{
 		int sign = 0;
-		R[k][k] > 0 ? sign = 1 : sign = -1;
+		this->GetDataAt(k,k) > 0 ? sign = 1 : sign = -1;
 		Matrix H(this->m_rows, this->m_rows);
 		H.LoadIdentity();
 		Matrix tmpH(this->m_rows - k, this->m_rows - k);
@@ -529,35 +530,21 @@ void Matrix::QRFactorization(Matrix *Qr, Matrix *Rr)
 		Matrix vkT(1, this->m_rows - k);
 		Matrix xk(this->m_rows - k, 1);
 		H.LoadIdentity();
-		
 		xk.SetColumnOfMatrixFromRow(*this, k, k);
-		//std::cout << "*****\n\nxk:\n" << xk.MatrixDataToString();
 		float xknorm = sqrtf(xk.SumOfRowAfterIndicePow2(0, 0));
-		
 		ek[0][0] = 1.0f;
-		vk = xk - ek*(xknorm*sign);
-		//std::cout << "*****\n\vk:\n" << vk.MatrixDataToString();
-		
+		vk = xk + ek*(xknorm*sign);
 		vkT = vk.Transpose();
-		//std::cout << "*****\n\vkt:\n" << vkT.MatrixDataToString();
 		Matrix vktV = vkT.Multiply(vk);
-		//std::cout << "*****\n\vktv:\n" << vktV.MatrixDataToString();
 		float c = 2 / vktV[0][0];
-		
 		I.LoadIdentity();
 		Matrix vvt(this->m_rows - k, this->m_rows - k);
-		//std::cout << "*****\n\vk:\n" << vk.MatrixDataToString();
-		//std::cout << "*****\n\vkt:\n" << vkT.MatrixDataToString();
 		vvt = vk.Multiply(vkT);
-		//std::cout << "*****\n\vvt:\n" << vvt.MatrixDataToString();
 		vvt *= c;
 		tmpH = I - vvt;
-		//std::cout << "*****\n\TMPH:\n" << tmpH.MatrixDataToString();
 		H.SetSubMatrix(tmpH, k, k);
 		Qs.push_back(H);
-		//std::cout << "*****\n\H:\n" << H.MatrixDataToString();
 		*this = H.Multiply(*this);
-		//std::cout << "*****\n\new Matrix\n" << this->MatrixDataToString();
 		k++;
 	}
 	Matrix tmp;
@@ -567,15 +554,16 @@ void Matrix::QRFactorization(Matrix *Qr, Matrix *Rr)
 	
 
 	Matrix Q(this->m_rows, this->m_rows);
+	Q.LoadIdentity();
 	if (Qs.size() == 1)
 	{
 		Q = Qs[0];
 	}
 
-	for (unsigned int i = 0; i < Qs.size() - 1; i++)
+	for (unsigned int i = 0; i < Qs.size() ; i++)
 	{
 
-		Q = Qs[i]*Qs[i + 1];
+		Q = Q*Qs[i];
 	}
 
 	std::cout << std::endl<<std::endl<<"Checking QxR :" << std::endl << std::endl << std::endl << Q.Multiply(R).MatrixDataToString();
@@ -587,7 +575,11 @@ void Matrix::QRFactorization(Matrix *Qr, Matrix *Rr)
 	std::cout << QtTemp.Multiply(Qtemp).MatrixDataToString();
 
 	std::cout << "\n\nMATRIX R:\n\n" << R.MatrixDataToString();
+	if (Qr!=nullptr)
+		*Qr = R;
 	std::cout << "\n\nMATRIX Q:\n\n" << Q.MatrixDataToString();
+	if (Rr != nullptr)
+		*Rr = R;
 }
 
 void Matrix::LoadIdentityUpperTriangle()
@@ -776,73 +768,90 @@ Matrix Matrix::operator*(const Matrix &rhs)
 	return ret;
 }
 
+std::vector<float> Matrix::GetEigenValuesUsingDeflation(float precision)
+{
+	std::vector<float> ret;
+	
+	float eigen = 0.0f;
+	Matrix rarinv(*this);
+	int k = 0;
+	while (k < this->m_rows - 1)
+	{
+		Matrix R(this->m_rows-k, this->m_column-k);
+		R.LoadIdentity();
+		Matrix eigenVector(this->m_rows - k, 1);
+		Matrix H(this->m_rows-k, this->m_column-k);
+		Matrix e(this->m_rows, 1);
+		
+		H = rarinv;
+		//std::cout << "\n\nH:\n" << H.MatrixDataToString();
+		eigen = H.GetMaxEigenvaluesUsingPowerMethod(precision, eigenVector);
+		//std::cout << "\n\nReturned Eigen vector:\n" << eigenVector.MatrixDataToString();
+		for (int i = 1; i < this->m_rows - k; i++)
+		{
+			R[i][0] = eigenVector[i][0] * -1;
+		}
+		//std::cout << "\n\nR\n" << R.MatrixDataToString();
+		Matrix ra = R* rarinv;
+		rarinv = ra*R.Inverse();
+		//std::cout << "\n\nnew matrix:\n\n" << rarinv.MatrixDataToString();
+		rarinv.ResizeMatrix(this->m_rows - (k+1), this->m_column - (k+1));
+		//std::cout << "\n\nnew matrix:\n\n" << rarinv.MatrixDataToString();
+		ret.push_back(eigen);
+		//std::cout << "\n\nH\n\n" << H.MatrixDataToString();
+		if (k == this->m_rows - 1)
+			ret.push_back(H[k][k]);
+
+		k++;
+	}
+	ret.push_back(rarinv[0][0]);
+	
+	return ret;
+}
+
 float Matrix::GetMaxEigenvaluesUsingPowerMethod(float precision,Matrix &eigenVector)
 {
+	
 	Matrix u0(this->m_rows, 1);
 	for (int i = 0; i < this->m_rows; i++)
 	{
 		u0[i][0] = 1.0f;
 	}
-	Matrix u1(this->m_rows, 1);
-	Matrix u1t(1, this->m_rows);
-	Matrix utu(1, 1);
-	Matrix uta;
-	Matrix utau;
-	float diff = 100;
-	float k2 = 0.0f;
+	Matrix w(this->m_rows, 1);
 	float k1 = 0.0f;
-	while (diff > precision)
+	float k2 = 0.0f;
+	float diff = 100.0f;
+	Matrix e(this->m_rows, 1);
+	while (diff>0.00000001)
 	{
-		
-		u1 = *this * u0;
-		
-
-		u1/=u1.GetInfiniteNorm();
-	
-		u1t = u1.Transpose();
-		
-		utu = u1t*u1;
-		uta = u1t* *this;
-		utau = uta*u1;
-		k1 = utau[0][0] / utu[0][0];
-		diff = std::abs((k1 - k2) / k1);
-		float temp = k1;
+		w = *this * u0;
+		e = w;
+		//std::cout << "\n\nw\n" << w.MatrixDataToString();
+		w /= w.GetInfiniteNorm();
+		u0 = w;
+		Matrix wt = w.Transpose();
+		Matrix wta = wt.Multiply(*this);
+		Matrix wtaw = wta*w;
+		Matrix wtw = wt*w;
+		k2 = (wtaw[0][0] / wtw[0][0]);
+		diff = abs((k2 - k1) / k2);
 		k1 = k2;
-		k2 = temp;
-		u0 = u1;
-		std::cout << "\n\n*=====";
-		std::cout << "\nMax Eigen At This Stage Is : " << k1;
-		std::cout << "\nDifference Is:  " << diff;
-		std::cout << "\n=====*\n";
-
 	}
 
-	/*Matrix M(*this);
-	Matrix b(this->m_rows, 1);
-	M *= -1;
-	for (int i = 0; i < this->m_rows; i++)
+	w /= w.GetInfiniteNorm();
+	//std::cout << "Eigenvector:\n\n" << w.MatrixDataToString();
+	if (w[0][0] == -1)
 	{
-		M[i][i] = k1 + M[i][i];
-		b[i][0] = 1.0f;
+		int m = w.FindDataIndiceInColumn(0, 1);
+		//w.SwapRows(m, 0);
+		w *= -1;
 	}
-
-	std::cout << M.MatrixDataToString();
-	
-	Matrix cpy(*this);
-	Matrix Q;
-	Matrix R;
-	cpy.QRFactorization(&Q, &R);
-	Matrix EigenVector = Q;
-	cpy = R*Q;
-	for (int i = 0; i < 10; i++)
-	{
-		cpy.QRFactorization(&Q, &R);
-		cpy = R*Q;
-		EigenVector=EigenVector.Multiply(Q);
-		std::cout << "\n\nMatrix M at this Point\n" << cpy.MatrixDataToString();
-		std::cout << "\n\nEigenVector At this Point:\n" << EigenVector.MatrixDataToString();
-		if (cpy.isDiagonal()) break;
-	}*/
+	//std::cout << "Eigenvector:\n\n" << w.MatrixDataToString();
+	Matrix Av = *this * e;
+	//std::cout << "\n\AV\n\n" << Av.MatrixDataToString();
+	e *= k1;
+	//std::cout << "\n\n u \n\n" << Av.MatrixDataToString();
+	eigenVector = w;
 
 	return k1;
 }
@@ -966,4 +975,49 @@ bool Matrix::isDiagonal()
 		}
 	}
 	return true;
+}
+
+Matrix Matrix::GetSubMatrix(int row, int col)
+{
+	Matrix ret(this->m_rows - row, this->m_column - col);
+	for (int i = row,l=0; i < this->m_rows; i++,l++)
+	{
+		for (int j = col,k=0; j < this->m_column; j++,k++)
+		{
+			ret[l][k] = this->m_data[i][j];
+		}
+	}
+	return ret;
+}
+
+void Matrix::ResizeMatrix(int newRow, int newCol)
+{
+	Matrix tmp(*this);
+	this->m_rows = newRow;
+	this->m_column = newCol;
+	this->m_isReleased = false;
+	this->m_data = new float*[this->m_rows];
+	for (int i = 0; i < this->m_rows; i++)
+	{
+		this->m_data[i] = new float[this->m_column];
+	}
+
+	*this = tmp.GetSubMatrix(tmp.RowSize() - newRow, tmp.ColumnSize() - newCol);
+
+}
+
+int Matrix::FindDataIndiceInColumn(int col, float data)
+{
+	int ret=INT_MAX;
+	float max = -9999;
+	for (int i = 0; i < this->m_rows; i++)
+	{
+		if (this->m_data[i][col] == data)
+		{
+			ret = i;
+			return i;
+			
+		}
+	}
+	return ret;
 }
